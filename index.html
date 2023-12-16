@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css">
+    <title>Provoke Developers</title>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+        }
+    </style>
+</head>
+
+<body onload="loadVideo()">
+    <section>
+        <div class="container my-5">
+            <div class="row">
+                <div class="col-md">
+                    <div class="input-group mb-3">
+                        <input type="text" id="videoIdInput" class="form-control rounded-0"
+                            placeholder="Search YouTube Video" aria-label="Search YouTube Video"
+                            aria-describedby="button-addon2">
+                        <button class="btn btn-outline-secondary rounded-0" type="button" id="button-addon2"
+                            onclick="loadVideo()">Search</button>
+                    </div>
+                </div>
+            </div>
+            <div class="row my-4">
+                <div class="col-md text-center">
+                    <div id="customPlayer">
+                        <div id="videoContainer">
+                            <!-- YouTube player will be embedded here -->
+                        </div>
+                        <div id="videoTitle" class="my-2 h4"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md text-center">
+                    <div class="row my-3">
+                        <div class="col-md-12">
+                            <div id="controls">
+                                <input type="range" id="progressBar" min="0" max="100" value="0" class="w-75">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 text-start">
+                            <div id="controls">
+                                <button id="playPauseBtn" class="me-2">Play</button>
+                                <button id="stopBtn" class="me-2">Stop</button>
+                                <button id="muteBtn" class="me-2">Mute</button>
+                            </div>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <div id="controls">
+                                <label class="me-2" for="volumeRange">Volume:</label>
+                                <input class="me-2" type="range" id="volumeRange" min="0" max="100" value="100">
+                                <label class="me-2" for="playbackSpeedSelect">Speed:</label>
+                                <select id="playbackSpeedSelect">
+                                    <option value="0.5">0.5x</option>
+                                    <option value="1" selected>1x</option>
+                                    <option value="1.5">1.5x</option>
+                                    <option value="2">2x</option>
+                                </select>
+                                <label class="me-2" for="qualitySelect">Quality:</label>
+                                <select id="qualitySelect">
+                                    <option value="small">240p</option>
+                                    <option value="medium" selected>360p</option>
+                                    <option value="large">720p</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <script>
+        // Replace 'YOUR_API_KEY' with your actual YouTube Data API key
+        const apiKey = 'AIzaSyAxo59ND2IE9zGDxPq6Ly27bTfmk0HXQrU';
+
+        let player;
+        let isMuted = false;
+
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('videoContainer', {
+                height: '360',
+                width: '640',
+                videoId: 'DvFyBJbeyoE', // Replace with your YouTube video ID
+                playerVars: {
+                    'autoplay': 0,
+                    'controls': 0,
+                    'rel': 0,
+                    'showinfo': 0,
+                    'modestbranding': 1,
+                },
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange,
+                },
+            });
+        }
+        function onPlayerReady(event) {
+            const playPauseBtn = document.getElementById('playPauseBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            const muteBtn = document.getElementById('muteBtn');
+            const volumeRange = document.getElementById('volumeRange');
+            const playbackSpeedSelect = document.getElementById('playbackSpeedSelect');
+            const fullscreenBtn = document.getElementById('fullscreenBtn');
+            const captionBtn = document.getElementById('captionBtn');
+            const qualitySelect = document.getElementById('qualitySelect');
+
+            playPauseBtn.addEventListener('click', togglePlayPause);
+            stopBtn.addEventListener('click', stopVideo);
+            muteBtn.addEventListener('click', toggleMute);
+            volumeRange.addEventListener('input', setVolume);
+            playbackSpeedSelect.addEventListener('change', changePlaybackSpeed);
+            fullscreenBtn.addEventListener('click', toggleFullscreen);
+            captionBtn.addEventListener('click', toggleCaption);
+            qualitySelect.addEventListener('change', changeVideoQuality);
+        }
+
+        function onPlayerStateChange(event) {
+            // You can handle state changes if needed
+        }
+
+        function togglePlayPause() {
+            if (player.getPlayerState() === YT.PlayerState.PLAYING) {
+                player.pauseVideo();
+                playPauseBtn.innerText = 'Play';
+            } else {
+                player.playVideo();
+                playPauseBtn.innerText = 'Pause';
+            }
+        }
+
+        function stopVideo() {
+            player.stopVideo();
+            playPauseBtn.innerText = 'Play';
+        }
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            player.mute(isMuted);
+            muteBtn.innerText = isMuted ? 'Unmute' : 'Mute';
+        }
+
+        function setVolume() {
+            const volume = volumeRange.value;
+            player.setVolume(volume);
+            if (volume == 0) {
+                muteBtn.innerText = 'Unmute';
+            } else {
+                muteBtn.innerText = 'Mute';
+            }
+        }
+
+        function changePlaybackSpeed() {
+            const selectedSpeed = playbackSpeedSelect.value;
+            player.setPlaybackRate(parseFloat(selectedSpeed));
+        }
+
+        function changeVideoQuality() {
+            const selectedQuality = qualitySelect.value;
+            player.setPlaybackQuality(selectedQuality);
+        }
+
+    </script>
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
